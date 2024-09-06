@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'usercrud
+
+  Sample SAM Template for usercrud
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  CreateUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Create a user and save it to DynamoDB
+      CodeUri: CreateUser
+      Handler: create.lambda_handler
+      Runtime: python3.10
+      Architectures:
+      - x86_64
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: CrudTable
+          REGION_NAME:
+            Ref: AWS::Region
+      Layers:
+      - Fn::GetAtt:
+        - AwsSamAutoDependencyLayerNestedStack
+        - Outputs.CreateUsercd02c98dDepLayer
+    Metadata:
+      SamResourceId: CreateUser
+  CrudTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: email
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  AwsSamAutoDependencyLayerNestedStack:
+    DeletionPolicy: Delete
+    Metadata:
+      CreatedBy: AWS SAM CLI sync command
+    Properties:
+      TemplateURL: /media/alvaro/Datos/Programacion/Estudios/AWS/SAM/usercrud/.aws-sam/auto-dependency-layer/adl_nested_template.yaml
+    Type: AWS::CloudFormation::Stack

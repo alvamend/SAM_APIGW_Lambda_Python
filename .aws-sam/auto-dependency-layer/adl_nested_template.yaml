@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS SAM CLI Nested Stack for Auto Dependency Layer Creation
+Metadata:
+  SamCliInfo: 1.120.0
+  key: AWS SAM CLI sync command
+Outputs:
+  CreateUsercd02c98dDepLayer:
+    Value:
+      Ref: CreateUsercd02c98dDepLayer
+Resources:
+  CreateUsercd02c98dDepLayer:
+    Metadata:
+      CreatedBy: AWS SAM CLI sync command
+    Properties:
+      CompatibleRuntimes:
+      - python3.10
+      ContentUri: /media/alvaro/Datos/Programacion/Estudios/AWS/SAM/usercrud/.aws-sam/auto-dependency-layer/CreateUsercd02c98dDepLayer
+      Description: Auto created layer for dependencies of function CreateUser
+      LayerName: usercruda391249e-CreateUsercd02c98d-DepLayer
+      RetentionPolicy: Delete
+    Type: AWS::Serverless::LayerVersion
+Transform: AWS::Serverless-2016-10-31

@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  usercrud
+
+  Sample SAM Template for usercrud
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  # Create user function
+  CreateUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: >-
+        Create a user and save it to DynamoDB
+      CodeUri: crud/
+      Handler: create.lambda_handler
+      Runtime: python3.10
+      Architectures:
+        - x86_64
+      # ENV VARIABLES
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CrudTable
+          REGION_NAME: !Ref AWS::Region
+      # Policies to allow CRUD in DynamoDB
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CrudTable
+      # Define events sent by API GW
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGw
+            Path: /users
+            Method: POST
+
+  # Read user function
+  ReadUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: >-
+        Retrieves a user
+      CodeUri: crud/
+      Handler: read.lambda_handler
+      Runtime: python3.10
+      Architectures:
+        - x86_64
+      # ENV VARIABLES
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CrudTable
+          REGION_NAME: !Ref AWS::Region
+      # Policies to allow CRUD in DynamoDB
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CrudTable
+      # Define events sent by API GW
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGw
+            Path: /users
+            Method: GET
+
+  # Api GW creation
+  ApiGw:
+    # ApiGW Type
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Dev
+      DefinitionBody:
+        swagger: 2.0
+        info:
+          title: "API GW for User CRUD"
+          version: "1.0"
+        paths:
+          # Each path and its http method for SWAGGER
+          /users:
+            post:
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateUser.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+            get:
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ReadUser.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+
+  # DynamoDB table
+  CrudTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: email
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
